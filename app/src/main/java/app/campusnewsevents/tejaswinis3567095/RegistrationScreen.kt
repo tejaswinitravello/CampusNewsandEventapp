@@ -1,9 +1,12 @@
 package app.campusnewsevents.tejaswinis3567095
 
-import android.app.Activity
+
+import android.app.DatePickerDialog
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,17 +15,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,295 +37,388 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.google.firebase.database.FirebaseDatabase
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
+
+@Preview(showBackground = true)
+@Composable
+fun RegistrationScreenPreview() {
+    RegistrationScreen(navController = NavHostController(LocalContext.current))
+}
 
 @Composable
-fun RegisterScreen( onBackToLogin: () -> Unit) {
-    var eventGuestError by remember { mutableStateOf("") }
+fun RegistrationScreen(navController: NavController) {
 
-    var eventGuestName by remember { mutableStateOf("") }
-    var eventGuestMail by remember { mutableStateOf("") }
-    var eventGuestPin by remember { mutableStateOf("") }
-    var confirmEventGuestPin by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
 
-    val genderOptions = listOf("Male", "Female", "Other")
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    var selectedGender by remember { mutableStateOf("Male") }
+    val context = LocalContext.current.findActivity()
 
-    val currentActivity = LocalContext.current as Activity
+    val context1 = LocalContext.current
+
+    var dobDate by remember { mutableStateOf("") }
+
+    val calendar = Calendar.getInstance()
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+    fun openDatePicker(
+        onSelect: (String) -> Unit,
+        minDate: Long? = null,
+        maxDate: Long? = null
+    ) {
+        val dp = DatePickerDialog(
+            context1,
+            { _, year, month, day ->
+                val c = Calendar.getInstance().apply {
+                    set(year, month, day)
+                }
+                onSelect(dateFormat.format(c.time))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
+        minDate?.let { dp.datePicker.minDate = it }
+
+        maxDate?.let { dp.datePicker.maxDate = it }
+
+        dp.show()
+    }
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(color = colorResource(R.color.bg_main)),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Image(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Welcome",
+                color = Color.White,
+                style = TextStyle(fontSize = 52.sp, fontWeight = FontWeight.Bold)
+            )
+            Text(
+                text = "Register to create Account",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 16.sp)
+            )
+
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+
+        OutlinedTextField(
             modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.CenterHorizontally),
-            painter = painterResource(id = R.drawable.bmi_logo),
-            contentDescription = "BMI Calculator"
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Enter Name") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.AccountCircle,
+                    contentDescription = "Name",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        DOBDateField(
+            label = "Date of Birth",
+            value = dobDate,
+            onClick = {
+                openDatePicker({ dobDate = it }, 1900)
+            }
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = city,
+            onValueChange = { city = it },
+            label = { Text("Enter City") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Map,
+                    contentDescription = "City",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Enter Email") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Email,
+                    contentDescription = "Email",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Enter Password") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Password,
+                    contentDescription = "Password",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "Register",
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 32.dp).align(Alignment.CenterHorizontally)
-        )
+            modifier = Modifier
+                .clickable {
+                    when {
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = eventGuestName,
-            onValueChange = { eventGuestName = it },
-            label = { Text("Enter Full Name") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle, // Replace with desired icon
-                    contentDescription = "Email Icon"
-                )
-            },
-        )
+                        name.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Name", Toast.LENGTH_SHORT).show()
+                        }
 
-        Spacer(modifier = Modifier.height(6.dp))
+                        dobDate.isBlank() -> {
+                            Toast.makeText(context, " Please Select DOB", Toast.LENGTH_SHORT).show()
+                        }
 
-        Text(text = "Select Gender", style = MaterialTheme.typography.bodyMedium)
+                        city.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter City", Toast.LENGTH_SHORT).show()
+                        }
 
-        // Gender options as radio buttons
+                        email.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
+                        }
 
-        Row(
-            Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            genderOptions.forEach { gender ->
-                RadioButton(
-                    selected = (gender == selectedGender),
-                    onClick = { selectedGender = gender }
-                )
-                Text(
-                    text = gender,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(end = 6.dp)
-                )
-            }
-        }
+                        password.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
+                                .show()
+                        }
 
+                        else -> {
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = eventGuestMail,
-            onValueChange = { eventGuestMail = it },
-            label = { Text("Enter E-Mail") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Email, // Replace with desired icon
-                    contentDescription = "Email Icon"
-                )
-            },
-        )
+                            val userData = UserData(
+                                fullname = name,
+                                dob = dobDate,
+                                email = email,
+                                city = city,
+                                password = password
+                            )
 
-        Spacer(modifier = Modifier.height(6.dp))
+                            val db = FirebaseDatabase.getInstance()
+                            val ref = db.getReference("Accounts")
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = eventGuestPin,
-            onValueChange = { eventGuestPin = it },
-            label = { Text("Enter Password") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Lock, // Replace with desired icon
-                    contentDescription = "Password Icon"
-                )
-            },
-        )
+                            ref.child(userData.email.replace(".", ","))
+                                .setValue(userData)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+
+                                        Toast.makeText(
+                                            context,
+                                            "Registration Successful",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        navController.navigate(AppScreens.Login.route) {
+                                            popUpTo(AppScreens.Register.route) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "User Registration Failed: ${task.exception?.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                                .addOnFailureListener { exception ->
+                                    Toast.makeText(
+                                        context,
+                                        "User Registration Failed: ${exception.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
 
 
-        Spacer(modifier = Modifier.height(6.dp))
+                        }
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = confirmEventGuestPin,
-            onValueChange = { confirmEventGuestPin = it },
-            label = { Text("Confirm Password") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Lock, // Replace with desired icon
-                    contentDescription = "Password Icon"
-                )
-            },
-        )
-
-        Spacer(modifier = Modifier.height(36.dp))
-        if (eventGuestError.isNotEmpty()) {
-            Text(
-                text = eventGuestError,
-                color = Color.Red,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-
-
-        Button(
-            onClick = {
-                when {
-                    eventGuestName.isBlank() -> {
-                        eventGuestError = "Better enter your name"
-                    }
-
-//                    isValidUsername(eventGuestName) -> {
-//                        eventGuestError = "Enter valid name"
-//                    }
-
-                    eventGuestMail.isBlank() -> {
-                        eventGuestError = "Better enter your mail"
-                    }
-
-                    validateEmail(eventGuestMail) -> {
-                        eventGuestError = "Enter Valid Mail"
-                    }
-
-                    eventGuestPin.isBlank() -> {
-                        eventGuestError = "Enter Password"
-                    }
-
-                    confirmEventGuestPin.isBlank() -> {
-                        eventGuestError = "Confirm Password"
-                    }
-
-                    eventGuestPin != confirmEventGuestPin -> {
-                        eventGuestError = "Ouch! Password seems wrong"
-
-                    }
-
-                    else -> {
-                        eventGuestError = ""
-                        val eventGuestData = UserData(
-                            fullName = eventGuestName,
-                            gender = selectedGender,
-                            email = eventGuestMail,
-                            password = eventGuestPin
-                        )
-                        doesUserExits(eventGuestData, currentActivity,onBackToLogin)
                     }
                 }
-
-
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp, 0.dp),
-            shape = RoundedCornerShape(8.dp)
+                .width(350.dp)
+                .background(
+                    color = colorResource(id = R.color.bt_color),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = colorResource(id = R.color.bt_color),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .padding(vertical = 12.dp)
+                .align(Alignment.CenterHorizontally),
+            text = "Register",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge.copy(
+                color = Color.White,
+            )
         )
-        {
-            Text("Register")
-        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-
         Row(
-            modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
+
             Text(
-                text = "I have an account / ",
-                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier,
+                text = "Already have an account?  ",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = colorResource(id = R.color.white),
+                )
             )
 
+
             Text(
-                text = "Login Now",
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black),
-                modifier = Modifier.clickable {
-                    // Intent to open RegisterActivity
+                modifier = Modifier
+                    .clickable {
 
-                    onBackToLogin.invoke()
+                        navController.navigate(AppScreens.Login.route) {
+                            popUpTo(AppScreens.Register.route) {
+                                inclusive = true
+                            }
+                        }
 
-//                    currentActivity.startActivity(
-//                        Intent(
-//                            currentActivity,
-//                            LoginActivity::class.java
-//                        )
-//                    )
-//                    currentActivity.finish()
+                    },
+                text = "Login",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = colorResource(id = R.color.white),
+                )
+            )
+
+        }
+
+        Spacer(modifier = Modifier.height(46.dp))
+    }
+}
+
+@Composable
+fun DOBDateField(label: String, value: String, onClick: () -> Unit) {
+    Column {
+        Spacer(Modifier.height(6.dp))
+
+        Box {
+            OutlinedTextField(
+                value = value,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text("Select $label") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = colorResource(R.color.tran_white),
+                    focusedContainerColor = colorResource(R.color.tran_white),
+                    unfocusedTextColor = Color.White,
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.DateRange,
+                        contentDescription = "DOB",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-    }
-}
-
-private fun doesUserExits(userData1: UserData, currentActivity: Activity,onBackToLogin: () -> Unit) {
-    val databaseReference = FirebaseDatabase.getInstance().getReference("Users")
-        .child(userData1.email.replace(".", ","))
-
-    databaseReference.get().addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            val userData = task.result?.getValue(UserData::class.java)
-            if (userData != null) {
-                Toast.makeText(currentActivity, "User already exists", Toast.LENGTH_SHORT).show()
-            } else {
-                saveUserData(userData1, currentActivity,onBackToLogin)
-            }
-        } else {
-            // Data retrieval failed
-            Toast.makeText(
-                currentActivity,
-                "Failed to retrieve user data: ${task.exception?.message}",
-                Toast.LENGTH_SHORT
-            ).show()
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .background(Color.Transparent)
+                    .clickable { onClick() }
+            )
         }
     }
 }
 
-private fun saveUserData(userData: UserData, currentActivity: Activity,onBackToLogin: () -> Unit) {
-    val db = FirebaseDatabase.getInstance()
-    val ref = db.getReference("Users")
 
-    ref.child(userData.email.replace(".", ",")).setValue(userData)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(currentActivity, "Registration Successful", Toast.LENGTH_SHORT)
-                    .show()
-
-                onBackToLogin.invoke()
-//                currentActivity.startActivity(Intent(currentActivity, LoginActivity::class.java))
-//                currentActivity.finish()
-
-            } else {
-                Toast.makeText(
-                    currentActivity,
-                    "Account Registration Failed",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-        .addOnFailureListener { _ ->
-            Toast.makeText(
-                currentActivity,
-                "Account Registration Failed",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-}
-
-fun isValidUsername(username: String): Boolean {
-    val regex =
-        "^[a-zA-Z]*$".toRegex() // Matches only alphabets, excluding spaces and other characters
-    return !regex.matches(username)
-}
-
-
-fun validateEmail(mail: String): Boolean {
-    val mailRegexPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
-    return !mailRegexPattern.matches(mail)
-}
+data class UserData(
+    val fullname: String = "",
+    val dob: String = "",
+    val email: String = "",
+    val city: String = "",
+    val password: String = "",
+    val profileImage: String = ""
+)

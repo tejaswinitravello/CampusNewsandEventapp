@@ -1,10 +1,15 @@
 package app.campusnewsevents.tejaswinis3567095
 
+import kotlin.jvm.java
+
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,16 +18,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,55 +36,85 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.google.firebase.database.FirebaseDatabase
 
 
+@Preview(showBackground = true)
 @Composable
-fun LoginScreen( onLoginSuccess: () -> Unit,
-                 onRegisterClick: () -> Unit) {
-    var eventGuestName by remember { mutableStateOf("") }
-    var eventGuestPin by remember { mutableStateOf("") }
+fun LoginScreenPreview() {
+    LoginScreen(navController = NavHostController(LocalContext.current))
+}
 
-    val currentActivity = LocalContext.current as Activity
+@Composable
+fun LoginScreen(navController: NavController) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
+
+    val context = LocalContext.current.findActivity()
+
+    val context1 = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(color = colorResource(R.color.bg_main)),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Image(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.CenterHorizontally),
-            painter = painterResource(id = R.drawable.bmi_logo),
-            contentDescription = "BMI Calculator"
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Welcome",
+                color = Color.White,
+                style = TextStyle(fontSize = 52.sp, fontWeight = FontWeight.Bold)
+            )
+            Text(
+                text = "Login to use app",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 16.sp)
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+        }
 
-        Text(
-            text = "Login",
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 32.dp).align(Alignment.CenterHorizontally)
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = eventGuestName,
-            onValueChange = { eventGuestName = it },
-            label = { Text("Enter Registered E-Mail") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Enter Email") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = "Email Icon"
+                Image(
+                    painter = painterResource(R.drawable.email),
+                    contentDescription = ""
+
                 )
             },
         )
@@ -86,106 +122,148 @@ fun LoginScreen( onLoginSuccess: () -> Unit,
         Spacer(modifier = Modifier.height(6.dp))
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = eventGuestPin,
-            onValueChange = { eventGuestPin = it },
-            label = { Text("Enter Password") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "Password Icon"
-                )
-            },
-        )
-
-        Spacer(modifier = Modifier.height(36.dp))
-
-        Button(
-            onClick = {
-                when{
-                    eventGuestName.isEmpty() -> {
-                        Toast.makeText(currentActivity, " Please Enter Mail", Toast.LENGTH_SHORT).show()
-                    }
-                    eventGuestPin.isEmpty() -> {
-                        Toast.makeText(currentActivity, " Please Enter Password", Toast.LENGTH_SHORT).show()
-                    }
-                    else -> {
-                        signInWithuseremail(eventGuestName, eventGuestPin, currentActivity,onLoginSuccess)
-                    }
-
-                }
-            },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp, 0.dp),
-            shape = RoundedCornerShape(8.dp)
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Enter Password") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+
+                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, description)
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            modifier = Modifier
+                .clickable {
+                    when {
+                        email.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
+                        }
+
+                        password.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        else -> {
+
+                           //login
+                        }
+
+                    }
+                }
+                .width(350.dp)
+                .background(
+                    color = colorResource(id = R.color.bt_color),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = colorResource(id = R.color.bt_color),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .padding(vertical = 12.dp)
+                .align(Alignment.CenterHorizontally),
+            text = "Login",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge.copy(
+                color = Color.White,
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text("Login")
+
+            Text(
+                modifier = Modifier,
+                text = "Lost Password?  ",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = colorResource(id = R.color.white),
+                )
+            )
+
+
+            Text(
+                modifier = Modifier
+                    .clickable {
+                        navController.navigate(AppScreens.ForgotPassword.route) {
+                            popUpTo(AppScreens.Login.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                text = "Reset Now",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = colorResource(id = R.color.white),
+                )
+            )
+
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-
         Row(
-            modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(
-                text = "I'm an New User / ",
-                style = MaterialTheme.typography.bodyLarge,
-            )
 
             Text(
-                text = "Register Now",
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black),
-                modifier = Modifier.clickable {
-                    onRegisterClick.invoke()
-                }
+                modifier = Modifier,
+                text = "New Here?  ",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = colorResource(id = R.color.white),
+                )
+            )
+
+
+            Text(
+                modifier = Modifier
+                    .clickable {
+                        navController.navigate(AppScreens.Register.route) {
+                            popUpTo(AppScreens.Login.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                text = "Create Account",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = colorResource(id = R.color.white),
+                )
             )
 
         }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-    }
-
-}
-
-private fun signInWithuseremail(useremail: String, userpassword: String, currentActivity: Activity,onLoginSuccess: () -> Unit) {
-
-    val databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(useremail.replace(".", ","))
-
-    databaseReference.get().addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            val userData = task.result?.getValue(UserData::class.java)
-            if (userData != null) {
-                if (userData.password == userpassword) {
-                    //Save User Details
-                    saveUserDetails(userData, currentActivity)
-                    UserDetails.saveUserLoginStatus(currentActivity,true)
-
-                    onLoginSuccess.invoke()
-
-                    Toast.makeText(currentActivity, "Login successful", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(currentActivity, "You Entered Wrong Password", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                Toast.makeText(currentActivity, "We don't have your details! Register Now", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(
-                currentActivity,
-                "Task Failed",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        Spacer(modifier = Modifier.height(46.dp))
     }
 }
 
-fun saveUserDetails(user: UserData, currentActivity: Context) {
-    UserDetails.saveUserLoginStatus(currentActivity = currentActivity, true)
-    UserDetails.saveName(currentActivity, user.fullName)
-    UserDetails.saveGender(currentActivity,user.gender)
-    UserDetails.saveEmail(currentActivity, user.email)
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 

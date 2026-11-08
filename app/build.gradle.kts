@@ -3,7 +3,7 @@ import org.gradle.kotlin.dsl.implementation
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
+//    id("com.google.gms.google-services")
 
 }
 
@@ -65,4 +65,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("androidx.compose:compose-bom:latest-version")
+
+    implementation("androidx.compose.material:material-icons-extended")
+
 }
