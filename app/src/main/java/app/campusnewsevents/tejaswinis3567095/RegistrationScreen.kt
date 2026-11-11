@@ -19,9 +19,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,7 +65,8 @@ fun RegistrationScreenPreview() {
 fun RegistrationScreen(navController: NavController) {
 
     var name by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
+    var course by remember { mutableStateOf("") }
+    var academicYear by remember { mutableStateOf("") }
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -153,15 +157,15 @@ fun RegistrationScreen(navController: NavController) {
             }
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        DOBDateField(
-            label = "Date of Birth",
-            value = dobDate,
-            onClick = {
-                openDatePicker({ dobDate = it }, 1900)
-            }
-        )
+//        Spacer(modifier = Modifier.height(6.dp))
+//
+//        DOBDateField(
+//            label = "Date of Birth",
+//            value = dobDate,
+//            onClick = {
+//                openDatePicker({ dobDate = it }, 1900)
+//            }
+//        )
 
         Spacer(Modifier.height(6.dp))
 
@@ -174,14 +178,40 @@ fun RegistrationScreen(navController: NavController) {
                 focusedContainerColor = colorResource(R.color.tran_white),
                 unfocusedTextColor = Color.White,
             ),
-            value = city,
-            onValueChange = { city = it },
-            label = { Text("Enter City") },
+            value = course,
+            onValueChange = { course = it },
+            label = { Text("Enter Course") },
             textStyle = TextStyle(color = colorResource(id = R.color.white)),
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Filled.Map,
-                    contentDescription = "City",
+                    imageVector = Icons.Filled.Book,
+                    contentDescription = "Course",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+        )
+
+
+        Spacer(Modifier.height(6.dp))
+
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = colorResource(R.color.tran_white),
+                focusedContainerColor = colorResource(R.color.tran_white),
+                unfocusedTextColor = Color.White,
+            ),
+            value = academicYear,
+            onValueChange = { academicYear = it },
+            label = { Text("Enter Academic Year") },
+            textStyle = TextStyle(color = colorResource(id = R.color.white)),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.CalendarMonth,
+                    contentDescription = "Enter Academic Year",
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(28.dp)
                 )
@@ -254,8 +284,11 @@ fun RegistrationScreen(navController: NavController) {
                             Toast.makeText(context, " Please Select DOB", Toast.LENGTH_SHORT).show()
                         }
 
-                        city.isEmpty() -> {
-                            Toast.makeText(context, " Please Enter City", Toast.LENGTH_SHORT).show()
+                        course.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Course", Toast.LENGTH_SHORT).show()
+                        }
+                        academicYear.isEmpty() -> {
+                            Toast.makeText(context, " Please Enter Academic Year", Toast.LENGTH_SHORT).show()
                         }
 
                         email.isEmpty() -> {
@@ -268,48 +301,6 @@ fun RegistrationScreen(navController: NavController) {
                         }
 
                         else -> {
-
-                            val userData = UserData(
-                                fullname = name,
-                                dob = dobDate,
-                                email = email,
-                                city = city,
-                                password = password
-                            )
-
-                            val db = FirebaseDatabase.getInstance()
-                            val ref = db.getReference("Accounts")
-
-                            ref.child(userData.email.replace(".", ","))
-                                .setValue(userData)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-
-                                        Toast.makeText(
-                                            context,
-                                            "Registration Successful",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        navController.navigate(AppScreens.Login.route) {
-                                            popUpTo(AppScreens.Register.route) {
-                                                inclusive = true
-                                            }
-                                        }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "User Registration Failed: ${task.exception?.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                                .addOnFailureListener { exception ->
-                                    Toast.makeText(
-                                        context,
-                                        "User Registration Failed: ${exception.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
 
 
                         }
