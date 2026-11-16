@@ -165,7 +165,16 @@ fun LoginScreen(navController: NavController) {
 
                         else -> {
 
-                           //login
+                            val userData = UserData(
+                                "",
+                                "",
+                                "",
+                                email,
+                                password,
+
+                            )
+                            loginUser(userData, context1)
+
                         }
 
                     }
@@ -265,5 +274,43 @@ fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+
+fun loginUser(userData: UserData, context: Context, onLoginSuccess: () -> Unit={}) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference =
+        firebaseDatabase.getReference("UsersData").child(userData.email.replace(".", ","))
+
+    databaseReference.get().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val dbData = task.result?.getValue(UserData::class.java)
+            if (dbData != null) {
+                if (dbData.password == userData.password) {
+
+//                    AppUserData.saveLoginStatus(context, true)
+//                    AppUserData.saveUserName(context, dbData.name)
+//                    AppUserData.saveUserEmail(context, dbData.emailid)
+                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+
+                    onLoginSuccess.invoke()
+
+                } else {
+                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } else {
+                Toast.makeText(context, "Your account not found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+    }
 }
 

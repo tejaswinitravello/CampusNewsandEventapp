@@ -1,7 +1,9 @@
 package app.campusnewsevents.tejaswinis3567095
 
 
+import android.R.attr.name
 import android.app.DatePickerDialog
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,7 +67,7 @@ fun RegistrationScreenPreview() {
 @Composable
 fun RegistrationScreen(navController: NavController) {
 
-    var name by remember { mutableStateOf("") }
+    var fullName by remember { mutableStateOf("") }
     var course by remember { mutableStateOf("") }
     var academicYear by remember { mutableStateOf("") }
 
@@ -143,8 +146,8 @@ fun RegistrationScreen(navController: NavController) {
                 focusedContainerColor = colorResource(R.color.tran_white),
                 unfocusedTextColor = Color.White,
             ),
-            value = name,
-            onValueChange = { name = it },
+            value = fullName,
+            onValueChange = { fullName = it },
             label = { Text("Enter Name") },
             textStyle = TextStyle(color = colorResource(id = R.color.white)),
             leadingIcon = {
@@ -276,7 +279,7 @@ fun RegistrationScreen(navController: NavController) {
                 .clickable {
                     when {
 
-                        name.isEmpty() -> {
+                        fullName.isEmpty() -> {
                             Toast.makeText(context, " Please Enter Name", Toast.LENGTH_SHORT).show()
                         }
 
@@ -301,6 +304,15 @@ fun RegistrationScreen(navController: NavController) {
                         }
 
                         else -> {
+
+                            val userData = UserData(
+                                fullName,
+                                course,
+                                academicYear,
+                                email,
+                                password
+                            )
+                            registerUser(userData, context1)
 
 
                         }
@@ -404,12 +416,43 @@ fun DOBDateField(label: String, value: String, onClick: () -> Unit) {
     }
 }
 
+fun registerUser(userData: UserData, context: Context,onRegistered: () -> Unit={}) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("UsersData")
+
+    databaseReference.child(userData.email.replace(".", ","))
+        .setValue(userData)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
+                    .show()
+
+                onRegistered.invoke()
+
+            } else {
+                Toast.makeText(
+                    context,
+                    "Registration Failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        .addOnFailureListener { _ ->
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+}
+
+
 
 data class UserData(
-    val fullname: String = "",
-    val dob: String = "",
+    val fullName: String = "",
+    val course: String = "",
+    val academicYear: String = "",
     val email: String = "",
-    val city: String = "",
     val password: String = "",
-    val profileImage: String = ""
 )
