@@ -160,16 +160,6 @@ fun RegistrationScreen(navController: NavController) {
             }
         )
 
-//        Spacer(modifier = Modifier.height(6.dp))
-//
-//        DOBDateField(
-//            label = "Date of Birth",
-//            value = dobDate,
-//            onClick = {
-//                openDatePicker({ dobDate = it }, 1900)
-//            }
-//        )
-
         Spacer(Modifier.height(6.dp))
 
         OutlinedTextField(
@@ -283,9 +273,6 @@ fun RegistrationScreen(navController: NavController) {
                             Toast.makeText(context, " Please Enter Name", Toast.LENGTH_SHORT).show()
                         }
 
-                        dobDate.isBlank() -> {
-                            Toast.makeText(context, " Please Select DOB", Toast.LENGTH_SHORT).show()
-                        }
 
                         course.isEmpty() -> {
                             Toast.makeText(context, " Please Enter Course", Toast.LENGTH_SHORT).show()
@@ -312,7 +299,13 @@ fun RegistrationScreen(navController: NavController) {
                                 email,
                                 password
                             )
-                            registerUser(userData, context1)
+                            registerUser(userData, context1, onRegistered = {
+                                navController.navigate(AppScreens.Login.route) {
+                                    popUpTo(AppScreens.Register.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            })
 
 
                         }
@@ -378,43 +371,6 @@ fun RegistrationScreen(navController: NavController) {
     }
 }
 
-@Composable
-fun DOBDateField(label: String, value: String, onClick: () -> Unit) {
-    Column {
-        Spacer(Modifier.height(6.dp))
-
-        Box {
-            OutlinedTextField(
-                value = value,
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text("Select $label") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = colorResource(R.color.tran_white),
-                    focusedContainerColor = colorResource(R.color.tran_white),
-                    unfocusedTextColor = Color.White,
-                ),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.DateRange,
-                        contentDescription = "DOB",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            )
-            Box(
-                Modifier
-                    .matchParentSize()
-                    .background(Color.Transparent)
-                    .clickable { onClick() }
-            )
-        }
-    }
-}
 
 fun registerUser(userData: UserData, context: Context,onRegistered: () -> Unit={}) {
 

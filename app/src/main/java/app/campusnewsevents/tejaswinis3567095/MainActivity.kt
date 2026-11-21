@@ -36,6 +36,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,12 +69,9 @@ fun MyAppNavGraph() {
             RegistrationScreen(navController = navController)
         }
 
-
-
-
-
-
-
+        composable(AppScreens.CampusHome.route) {
+            CampusHomeScreen()
+        }
 
 
     }
@@ -86,14 +84,23 @@ fun LoadingScreenCheck(navController: NavController) {
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        delay(3000)
+        delay(3000.milliseconds)
 
-
+        if (AppUserData.getLoginStatus(context)) {
+            navController.navigate(AppScreens.CampusHome.route) {
+                popUpTo(AppScreens.Splash.route) {
+                    inclusive = true
+                }
+            }
+        }else{
             navController.navigate(AppScreens.Login.route) {
                 popUpTo(AppScreens.Splash.route) {
                     inclusive = true
                 }
             }
+        }
+
+
 
 
     }
@@ -123,7 +130,7 @@ fun EntryScreen() {
                     .size(380.dp, 380.dp)
                     .padding(16.dp),
                 painter = painterResource(id = R.drawable.app_icon),
-                contentDescription = "News Sharing",
+                contentDescription = "News App",
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -137,9 +144,6 @@ fun EntryScreen() {
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center
             )
-
-//            Spacer(modifier = Modifier.height(32.dp))
-//            Spacer(modifier = Modifier.height(32.dp))
 
             Spacer(modifier = Modifier.height(16.dp))
 

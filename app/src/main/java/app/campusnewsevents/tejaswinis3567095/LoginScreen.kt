@@ -173,7 +173,13 @@ fun LoginScreen(navController: NavController) {
                                 password,
 
                             )
-                            loginUser(userData, context1)
+                            loginUser(userData, context1, onLoginSuccess = {
+                                navController.navigate(AppScreens.CampusHome.route) {
+                                    popUpTo(AppScreens.Login.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            })
 
                         }
 
@@ -217,11 +223,11 @@ fun LoginScreen(navController: NavController) {
             Text(
                 modifier = Modifier
                     .clickable {
-                        navController.navigate(AppScreens.ForgotPassword.route) {
-                            popUpTo(AppScreens.Login.route) {
-                                inclusive = true
-                            }
-                        }
+//                        navController.navigate(AppScreens.ForgotPassword.route) {
+//                            popUpTo(AppScreens.Login.route) {
+//                                inclusive = true
+//                            }
+//                        }
                     },
                 text = "Reset Now",
                 textAlign = TextAlign.Center,
@@ -289,9 +295,10 @@ fun loginUser(userData: UserData, context: Context, onLoginSuccess: () -> Unit={
             if (dbData != null) {
                 if (dbData.password == userData.password) {
 
-//                    AppUserData.saveLoginStatus(context, true)
-//                    AppUserData.saveUserName(context, dbData.name)
-//                    AppUserData.saveUserEmail(context, dbData.emailid)
+                    AppUserData.saveLoginStatus(context, true)
+                    AppUserData.saveUserName(context, dbData.fullName)
+                    AppUserData.saveUserEmail(context, dbData.email)
+
                     Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
 
                     onLoginSuccess.invoke()
